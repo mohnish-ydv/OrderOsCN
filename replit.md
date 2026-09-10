@@ -1,6 +1,6 @@
-# [Project name]
+# OrderOS
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+OrderOS turns messy dealer messages into verified, actionable orders for Indian distributors.
 
 ## Run & Operate
 
@@ -22,15 +22,20 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/orderos` — React/Vite operator workspace and routes
+- `artifacts/api-server/src/routes/orderos.ts` — demo API and deterministic synthetic dataset
+- `lib/api-spec/openapi.yaml` — source of truth for generated API hooks and schemas
+- `artifacts/orderos/src/index.css` — OrderOS visual tokens and theme
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The first experience is a clearly labelled synthetic demo so operators can explore the exception-first workflow without connected customer systems.
+- Confidence values are normalized from 0 to 1 across the API; financial totals and validation stay deterministic rather than delegated to an LLM.
+- Dealer memory is scoped by dealer in the API and UI; it is never presented as a global alias dictionary.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The app provides a command center, searchable order inbox, order detail and approval flow, dealer profiles, product catalogue, dealer-specific AI memory, operational analytics, and an unavailable-integrations state.
 
 ## User preferences
 
@@ -38,7 +43,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- When the API contract changes, run `pnpm --filter @workspace/api-spec run codegen` before checking the frontend.
+- Use the managed `artifacts/api-server: API Server` and `artifacts/orderos: web` workflows; the app relies on the proxy paths `/api` and `/`.
 
 ## Pointers
 

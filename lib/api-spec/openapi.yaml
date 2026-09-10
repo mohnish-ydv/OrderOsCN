@@ -3,20 +3,24 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: OrderOS order intelligence API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: dashboard
+  - name: orders
+  - name: dealers
+  - name: products
+  - name: memory
+  - name: analytics
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +28,514 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get the command center summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List incoming orders
+      parameters:
+        - $ref: "#/components/parameters/Status"
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get an order with its interpretation and audit history
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateOrder
+      tags: [orders]
+      summary: Edit an order before approval
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderUpdate"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+    post:
+      operationId: approveOrder
+      tags: [orders]
+      summary: Explicitly approve an order
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Approved order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+  /orders/{orderId}/resolve:
+    post:
+      operationId: resolveOrderException
+      tags: [orders]
+      summary: Resolve an order exception with a selected product or action
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExceptionResolution"
+      responses:
+        "200":
+          description: Resolved order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+  /dealers:
+    get:
+      operationId: listDealers
+      tags: [dealers]
+      summary: List dealers
+      parameters:
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Dealers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dealer"
+  /dealers/{dealerId}:
+    get:
+      operationId: getDealer
+      tags: [dealers]
+      summary: Get a dealer profile
+      parameters:
+        - $ref: "#/components/parameters/DealerId"
+      responses:
+        "200":
+          description: Dealer profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealerDetail"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List catalogue products
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+  /memories:
+    get:
+      operationId: listMemories
+      tags: [memory]
+      summary: List dealer-specific AI memory
+      parameters:
+        - name: dealerId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: AI memories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiMemory"
+  /memories/{memoryId}:
+    patch:
+      operationId: updateMemory
+      tags: [memory]
+      summary: Confirm or edit a memory
+      parameters:
+        - $ref: "#/components/parameters/MemoryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryUpdate"
+      responses:
+        "200":
+          description: Updated memory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiMemory"
+    delete:
+      operationId: deleteMemory
+      tags: [memory]
+      summary: Delete a memory
+      parameters:
+        - $ref: "#/components/parameters/MemoryId"
+      responses:
+        "204":
+          description: Deleted
+  /analytics:
+    get:
+      operationId: getAnalytics
+      tags: [analytics]
+      summary: Get operational analytics
+      responses:
+        "200":
+          description: Analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analytics"
 components:
+  parameters:
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+    DealerId:
+      name: dealerId
+      in: path
+      required: true
+      schema:
+        type: string
+    MemoryId:
+      name: memoryId
+      in: path
+      required: true
+      schema:
+        type: string
+    Status:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [all, new, processing, attention, approved, blocked, completed]
+        default: all
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
   schemas:
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
-
+      required: [status]
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Dashboard:
+      type: object
+      required: [dateLabel, ordersToday, autoProcessed, needsAttention, blocked, orderValue, timeSavedMinutes, attentionItems, recentActivity]
+      properties:
+        dateLabel: { type: string }
+        ordersToday: { type: integer }
+        autoProcessed: { type: integer }
+        needsAttention: { type: integer }
+        blocked: { type: integer }
+        orderValue: { type: number }
+        timeSavedMinutes: { type: integer }
+        attentionItems:
+          type: array
+          items: { $ref: "#/components/schemas/AttentionItem" }
+        recentActivity:
+          type: array
+          items: { $ref: "#/components/schemas/Activity" }
+    AttentionItem:
+      type: object
+      required: [id, orderNumber, type, title, dealerName, detail, severity, confidence]
+      properties:
+        id: { type: string }
+        orderNumber: { type: string }
+        type: { type: string, enum: [ambiguity, credit, stock, discount, duplicate] }
+        title: { type: string }
+        dealerName: { type: string }
+        detail: { type: string }
+        severity: { type: string, enum: [high, medium, low] }
+        confidence: { type: number }
+    Activity:
+      type: object
+      required: [id, message, actor, timestamp, tone]
+      properties:
+        id: { type: string }
+        message: { type: string }
+        actor: { type: string }
+        timestamp: { type: string }
+        tone: { type: string, enum: [success, warning, neutral] }
+    Order:
+      type: object
+      required: [id, orderNumber, dealerId, dealerName, source, receivedAt, value, confidence, status, exceptionCount, itemCount]
+      properties:
+        id: { type: string }
+        orderNumber: { type: string }
+        dealerId: { type: string }
+        dealerName: { type: string }
+        source: { type: string, enum: [text, voice, image, pdf, manual, api] }
+        receivedAt: { type: string }
+        value: { type: number }
+        confidence: { type: number }
+        status: { type: string, enum: [new, processing, attention, approved, blocked, completed] }
+        exceptionCount: { type: integer }
+        itemCount: { type: integer }
+        preview: { type: string }
+    OrderDetail:
+      allOf:
+        - $ref: "#/components/schemas/Order"
+        - type: object
+          required: [originalMessage, items, exceptions, audit]
+          properties:
+            originalMessage: { type: string }
+            transcript: { type: ["string", "null"] }
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/OrderItem" }
+            exceptions:
+              type: array
+              items: { $ref: "#/components/schemas/OrderException" }
+            audit:
+              type: array
+              items: { $ref: "#/components/schemas/Activity" }
+            totals: { $ref: "#/components/schemas/OrderTotals" }
+    OrderItem:
+      type: object
+      required: [id, rawText, productName, sku, quantity, unit, confidence, price, discount, tax, stock, stockStatus]
+      properties:
+        id: { type: string }
+        rawText: { type: string }
+        productName: { type: string }
+        sku: { type: string }
+        quantity: { type: number }
+        unit: { type: string }
+        confidence: { type: number }
+        price: { type: number }
+        discount: { type: number }
+        tax: { type: number }
+        stock: { type: number }
+        stockStatus: { type: string, enum: [available, shortage, backorder] }
+        alternatives:
+          type: array
+          items: { $ref: "#/components/schemas/MatchAlternative" }
+    MatchAlternative:
+      type: object
+      required: [productName, sku, confidence]
+      properties:
+        productName: { type: string }
+        sku: { type: string }
+        confidence: { type: number }
+    OrderException:
+      type: object
+      required: [id, type, title, detail, severity, resolved]
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [ambiguity, credit, stock, discount, duplicate, tax, unknown] }
+        title: { type: string }
+        detail: { type: string }
+        severity: { type: string, enum: [high, medium, low] }
+        resolved: { type: boolean }
+    OrderTotals:
+      type: object
+      required: [subtotal, discount, gst, total]
+      properties:
+        subtotal: { type: number }
+        discount: { type: number }
+        gst: { type: number }
+        total: { type: number }
+    OrderUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [new, processing, attention, approved, blocked, completed] }
+        itemId: { type: string }
+        quantity: { type: number, minimum: 0 }
+        sku: { type: string }
+    ExceptionResolution:
+      type: object
+      required: [exceptionId, action]
+      properties:
+        exceptionId: { type: string }
+        action: { type: string, enum: [select, partial, backorder, ask_dealer, substitute, dismiss] }
+        sku: { type: ["string", "null"] }
+    Dealer:
+      type: object
+      required: [id, name, location, status, orders, lifetimeValue, averageOrder, lastOrderAt, openExceptions]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        location: { type: string }
+        status: { type: string, enum: [active, paused] }
+        orders: { type: integer }
+        lifetimeValue: { type: number }
+        averageOrder: { type: number }
+        lastOrderAt: { type: string }
+        openExceptions: { type: integer }
+    DealerDetail:
+      allOf:
+        - $ref: "#/components/schemas/Dealer"
+        - type: object
+          required: [topProducts, memories, recentOrders]
+          properties:
+            topProducts:
+              type: array
+              items: { $ref: "#/components/schemas/Product" }
+            memories:
+              type: array
+              items: { $ref: "#/components/schemas/AiMemory" }
+            recentOrders:
+              type: array
+              items: { $ref: "#/components/schemas/Order" }
+    Product:
+      type: object
+      required: [id, sku, name, brand, category, unit, packaging, gstRate, mrp, dealerPrice, stock, aliases, stockStatus]
+      properties:
+        id: { type: string }
+        sku: { type: string }
+        name: { type: string }
+        brand: { type: string }
+        category: { type: string }
+        unit: { type: string }
+        packaging: { type: string }
+        gstRate: { type: number }
+        mrp: { type: number }
+        dealerPrice: { type: number }
+        stock: { type: number }
+        aliases:
+          type: array
+          items: { type: string }
+        stockStatus: { type: string, enum: [healthy, low, out] }
+    AiMemory:
+      type: object
+      required: [id, dealerId, dealerName, trigger, interpretation, confidence, source, createdAt, lastUsedAt, usageCount, state]
+      properties:
+        id: { type: string }
+        dealerId: { type: string }
+        dealerName: { type: string }
+        trigger: { type: string }
+        interpretation: { type: string }
+        confidence: { type: number }
+        source: { type: string }
+        createdAt: { type: string }
+        lastUsedAt: { type: string }
+        usageCount: { type: integer }
+        state: { type: string, enum: [suggested, confirmed] }
+    MemoryUpdate:
+      type: object
+      properties:
+        interpretation: { type: string }
+        state: { type: string, enum: [suggested, confirmed] }
+    Analytics:
+      type: object
+      required: [processing, dealer, product, ai, weeklyVolume]
+      properties:
+        processing: { $ref: "#/components/schemas/ProcessingAnalytics" }
+        dealer: { $ref: "#/components/schemas/DealerAnalytics" }
+        product: { $ref: "#/components/schemas/ProductAnalytics" }
+        ai: { $ref: "#/components/schemas/AiAnalytics" }
+        weeklyVolume:
+          type: array
+          items: { $ref: "#/components/schemas/VolumePoint" }
+    ProcessingAnalytics:
+      type: object
+      required: [autoProcessingRate, averageProcessingMinutes, exceptionRate, accuracy]
+      properties:
+        autoProcessingRate: { type: number }
+        averageProcessingMinutes: { type: number }
+        exceptionRate: { type: number }
+        accuracy: { type: number }
+    DealerAnalytics:
+      type: object
+      required: [active, inactive, averageOrderValue, repeatRate]
+      properties:
+        active: { type: integer }
+        inactive: { type: integer }
+        averageOrderValue: { type: number }
+        repeatRate: { type: number }
+    ProductAnalytics:
+      type: object
+      required: [fastMoving, decliningDemand, stockOutFrequency]
+      properties:
+        fastMoving: { type: integer }
+        decliningDemand: { type: integer }
+        stockOutFrequency: { type: number }
+    AiAnalytics:
+      type: object
+      required: [ambiguousProducts, commonAliases, correctionRate, highConfidenceShare]
+      properties:
+        ambiguousProducts: { type: integer }
+        commonAliases: { type: integer }
+        correctionRate: { type: number }
+        highConfidenceShare: { type: number }
+    VolumePoint:
+      type: object
+      required: [label, orders, value]
+      properties:
+        label: { type: string }
+        orders: { type: integer }
+        value: { type: number }

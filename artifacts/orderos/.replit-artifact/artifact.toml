@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "OrderOS"
+description = "An order intelligence workspace for Indian distributors that turns messy dealer messages into verified, actionable sales orders with AI-assisted matching and exception handling."
+version = "1.0.0"
+id = "artifacts/orderos"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18292
+
+[services.development]
+run = "pnpm --filter @workspace/orderos run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/orderos", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/orderos/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18292"
+BASE_PATH = "/"

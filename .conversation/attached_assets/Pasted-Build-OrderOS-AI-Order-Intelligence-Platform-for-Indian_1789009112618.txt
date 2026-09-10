@@ -1,0 +1,1426 @@
+Build OrderOS — AI Order Intelligence Platform for Indian Distributors
+
+Build a production-quality SaaS/web application called OrderOS.
+
+1. Product
+
+OrderOS is an AI-powered order intelligence system for Indian distributors, wholesalers and manufacturers.
+
+Core promise:
+
+«Your dealers talk. OrderOS turns it into verified orders.»
+
+The system converts messy incoming orders — text, Hinglish, voice notes, images, screenshots and PDFs — into structured sales orders.
+
+It must NOT be positioned as another generic ERP, CRM or chatbot.
+
+The core workflow is:
+
+Messy dealer message → AI interpretation → SKU matching → validation → exception handling → human approval → order
+
+The dealer should NOT need to install a separate app.
+
+---
+
+2. Target Customer
+
+Primary customer:
+
+- Indian distributors
+- wholesalers
+- manufacturers with dealer networks
+- B2B suppliers
+
+Initial vertical:
+
+Electrical distributors
+
+Design the architecture so other verticals can later be added:
+
+- Hardware
+- Plumbing
+- FMCG
+- Auto parts
+- Industrial supplies
+- Building materials
+
+---
+
+3. Core Differentiator
+
+The most important feature is Dealer Memory.
+
+Different dealers use different names, abbreviations, quantities and language.
+
+Example:
+
+Dealer:
+
+«"bhai 20 anchor 6A, 10 16A socket, 5 2.5 blue aur 3 red coil"»
+
+OrderOS should understand that using the distributor's catalogue and historical data.
+
+Another dealer may say:
+
+«"same last wala + 10 MCB"»
+
+The system should use historical orders to determine what “same last wala” means.
+
+Store learned mappings such as:
+
+Dealer: Sharma Electricals
+
+"blue 2.5"
+→ Finolex 2.5mm Blue Wire
+
+"red coil"
+→ SKU-4821
+
+"32 wala"
+→ L&T 32A MCB
+
+"one box"
+→ 10 units
+
+"same rate"
+→ last negotiated dealer-specific price
+
+Dealer-specific terminology must NEVER be globally applied to another dealer.
+
+---
+
+4. Main Dashboard
+
+Create a premium, modern B2B SaaS dashboard.
+
+Avoid generic admin-dashboard aesthetics.
+
+The home screen should immediately answer:
+
+«"What needs my attention?"»
+
+Show:
+
+Today's Overview
+
+- Orders received
+- Orders automatically processed
+- Orders needing attention
+- Blocked orders
+- Total order value
+- Estimated time saved
+
+Example:
+
+GOOD MORNING
+
+187 Orders Today
+
+161
+Auto Processed
+
+18
+Need Attention
+
+8
+Blocked
+
+₹12.8L
+Order Value
+
+Then a prominent:
+
+NEEDS YOUR ATTENTION
+
+Example cards:
+
+#4821
+Ambiguous Product
+
+Dealer:
+Sharma Electricals
+
+AI confidence: 84%
+
+"10 pcs 20mm pipe"
+
+Possible matches:
+20mm PVC Pipe
+20mm Conduit Pipe
+
+[Resolve]
+
+#4817
+Credit Limit Exceeded
+
+Dealer:
+Gupta Electricals
+
+Order: ₹48,200
+Available credit: ₹31,400
+
+[Review]
+
+#4812
+Stock Shortage
+
+Requested: 30
+Available: 18
+
+[Resolve]
+
+The UI should prioritize exceptions rather than showing unnecessary analytics.
+
+---
+
+5. Order Inbox
+
+Create an order inbox similar to an email/helpdesk inbox.
+
+Filters:
+
+- All
+- New
+- Processing
+- Need Attention
+- Approved
+- Blocked
+- Completed
+
+Each order should show:
+
+- Order number
+- Dealer
+- Source
+- timestamp
+- order value
+- confidence
+- status
+- exception count
+
+Sources:
+
+- Text
+- Voice
+- Image
+- PDF
+- Manual
+- API
+
+---
+
+6. Order Detail Page
+
+This is one of the most important screens.
+
+Display:
+
+ORIGINAL MESSAGE
+
+Show the exact original dealer message.
+
+Example:
+
+«"Bhai 20 anchor 6A, 10 16A socket, 5 2.5 blue wala aur 3 red coil"»
+
+Then:
+
+AI INTERPRETATION
+
+20 × Anchor 6A Switch
+10 × 16A Socket
+5 × 2.5mm Blue Wire
+3 × Red Wire Coil
+
+For every line display:
+
+- matched product
+- SKU
+- quantity
+- unit
+- confidence
+- price
+- discount
+- tax
+- stock availability
+
+Example:
+
+Anchor 6A Switch
+SKU: ANK-6A-001
+
+Qty      20
+Price    ₹72
+Stock    ✓ 184
+
+AI Confidence
+98%
+
+Allow editing any field.
+
+---
+
+7. AI Confidence System
+
+Every extracted order item receives a confidence score.
+
+Use:
+
+Green
+
+90–100%
+
+High confidence.
+
+Yellow
+
+70–89%
+
+Review recommended.
+
+Red
+
+Below 70%
+
+Human confirmation required.
+
+Never silently invent a product match.
+
+When uncertain, show:
+
+I'm not confident which product the dealer means.
+
+"20mm pipe"
+
+Possible matches:
+
+1. 20mm PVC Pipe — 91%
+2. 20mm Conduit Pipe — 74%
+3. 20mm GI Pipe — 48%
+
+[Select]
+[Ask Dealer]
+
+---
+
+8. Exception Engine
+
+Create a centralized exception system.
+
+Detect:
+
+Product ambiguity
+
+Quantity ambiguity
+
+Unknown SKU
+
+Stock shortage
+
+Dealer credit exceeded
+
+Invalid discount
+
+Price anomaly
+
+Minimum order violation
+
+GST/tax inconsistency
+
+Duplicate order
+
+Suspicious order
+
+Unusual purchasing pattern
+
+The owner should be able to resolve exceptions from one screen.
+
+---
+
+9. Dealer Management
+
+Create a dealer directory.
+
+Dealer profile should show:
+
+SHARMA ELECTRICALS
+
+Status:
+Active
+
+Orders:
+127
+
+Lifetime value:
+₹18.4L
+
+Average order:
+₹14,500
+
+Last order:
+4 days ago
+
+Sections:
+
+Overview
+
+Orders
+
+Products
+
+Pricing
+
+Credit
+
+AI Memory
+
+Activity
+
+---
+
+10. Dealer AI Memory
+
+This is a flagship feature.
+
+Display learned terminology:
+
+AI MEMORY
+
+"blue 2.5"
+→ Finolex 2.5mm Blue Wire
+
+"32 wala"
+→ L&T 32A MCB
+
+"one box"
+→ 10 units
+
+"same rate"
+→ Use previous negotiated price
+
+"last order"
+→ Order #4721
+
+Each memory must have:
+
+- confidence
+- source
+- created date
+- last used
+- usage count
+
+Allow:
+
+[Edit]
+
+[Delete]
+
+[Confirm]
+
+Do not let low-confidence assumptions permanently become high-confidence memories without evidence.
+
+---
+
+11. Product Catalogue
+
+Create product catalogue management.
+
+Fields:
+
+- SKU
+- Product name
+- Brand
+- Category
+- Description
+- Unit
+- Packaging
+- GST rate
+- MRP
+- Dealer price
+- Stock
+- aliases
+- specifications
+
+Example:
+
+SKU: FIN-25-BLU
+
+Finolex 2.5mm Wire — Blue
+
+Brand:
+Finolex
+
+Unit:
+Coil
+
+Packaging:
+90m
+
+GST:
+18%
+
+Stock:
+84
+
+Allow CSV import/export.
+
+---
+
+12. Dealer-Specific Pricing
+
+A distributor can define:
+
+Product:
+SKU-4821
+
+Standard:
+₹100
+
+Sharma Electricals:
+₹94
+
+Gupta Electricals:
+₹91
+
+Patel Electricals:
+₹96
+
+OrderOS should automatically use the correct dealer price.
+
+Show the reason for pricing:
+
+₹94
+
+Dealer-specific negotiated price
+Last updated 12 Aug 2026
+
+---
+
+13. Stock Validation
+
+Before approval:
+
+Check:
+
+- available stock
+- reserved stock
+- requested quantity
+- expected incoming stock
+
+If insufficient:
+
+Requested: 30
+Available: 18
+
+Short by: 12
+
+Suggested actions:
+
+[Partial Order]
+[Backorder]
+[Ask Dealer]
+[Substitute]
+
+---
+
+14. Order Approval
+
+Provide a clear approval screen.
+
+Example:
+
+ORDER #4821
+
+Dealer:
+Sharma Electricals
+
+Items:
+₹42,800
+
+Discount:
+₹2,400
+
+GST:
+₹7,272
+
+TOTAL:
+₹47,672
+
+✓ Stock verified
+✓ Dealer price verified
+✓ Credit verified
+✓ No duplicate detected
+
+AI Confidence:
+96%
+
+[APPROVE ORDER]
+[EDIT]
+[ASK DEALER]
+[HOLD]
+
+Approval must be explicit.
+
+AI must not automatically finalize financially consequential orders unless the business owner has explicitly enabled automation rules.
+
+---
+
+15. Ask Dealer
+
+Create a mechanism for resolving ambiguity.
+
+Example:
+
+OrderOS detected an ambiguity:
+
+"10 pcs 20mm pipe"
+
+Which product do you want?
+
+[20mm PVC Pipe]
+[20mm Conduit Pipe]
+
+Allow generating a dealer-friendly message.
+
+Use natural Indian business language.
+
+Support:
+
+- English
+- Hindi
+- Hinglish
+
+Example:
+
+«"Bhai, 20mm PVC pipe chahiye ya conduit pipe?"»
+
+---
+
+16. Voice Orders
+
+Allow uploading voice notes.
+
+Workflow:
+
+Voice note
+↓
+Speech-to-text
+↓
+Language detection
+↓
+Order extraction
+↓
+SKU matching
+↓
+Validation
+
+Display:
+
+VOICE ORDER
+
+Transcript
+
+"Bhai 10 box 6 amp switch..."
+
+Never hide the original transcript.
+
+---
+
+17. Image Orders
+
+Allow:
+
+- screenshots
+- handwritten order lists
+- photographed paper orders
+- catalogue screenshots
+
+Workflow:
+
+Image
+↓
+OCR
+↓
+AI extraction
+↓
+SKU matching
+↓
+validation
+
+Show extracted information alongside the original image.
+
+---
+
+18. PDF Orders
+
+Support uploaded PDF purchase orders.
+
+Extract:
+
+- product
+- SKU
+- quantity
+- unit
+- price
+- tax
+
+Show confidence per field.
+
+---
+
+19. Search
+
+Global search should search:
+
+- dealers
+- orders
+- products
+- SKUs
+- aliases
+- messages
+- invoices
+- memories
+
+Example:
+
+Searching:
+
+«"blue 2.5"»
+
+could return:
+
+Product
+Finolex 2.5mm Blue
+
+Used by:
+14 dealers
+
+Orders:
+482
+
+---
+
+20. Analytics
+
+Do NOT overload the app with meaningless charts.
+
+Focus on useful operational analytics.
+
+Show:
+
+Order processing
+
+- auto-processing rate
+- average processing time
+- exception rate
+- AI accuracy
+
+Dealer analytics
+
+- order frequency
+- average order value
+- inactive dealers
+- top products
+
+Product analytics
+
+- fast-moving products
+- declining demand
+- stock-out frequency
+
+AI analytics
+
+- most ambiguous products
+- most common dealer aliases
+- correction rate
+- confidence distribution
+
+---
+
+21. AI Learning Loop
+
+Every human correction should improve future matching.
+
+Example:
+
+AI:
+
+«"red wire"»
+
+matched incorrectly.
+
+Human selects:
+
+«Finolex 2.5mm Red»
+
+System records:
+
+Dealer-specific correction
+
+Future messages from the same dealer should benefit.
+
+However:
+
+Never train globally from a single customer's private business data without explicit permission.
+
+Keep tenant/customer data isolated.
+
+---
+
+22. Multi-Tenant Architecture
+
+This is a SaaS product.
+
+Every business is a tenant.
+
+Data must be isolated.
+
+Structure:
+
+Organization
+ ├── Users
+ ├── Dealers
+ ├── Products
+ ├── Orders
+ ├── Pricing
+ ├── Inventory
+ ├── AI Memories
+ ├── Rules
+ └── Integrations
+
+Users:
+
+- Owner
+- Admin
+- Sales
+- Operations
+- Viewer
+
+Implement proper authorization.
+
+---
+
+23. Business Rules Engine
+
+Allow businesses to define rules such as:
+
+IF dealer = X
+AND order > ₹50,000
+THEN require approval
+
+IF stock < requested quantity
+THEN flag exception
+
+IF discount > 8%
+THEN require manager approval
+
+IF confidence < 80%
+THEN ask for confirmation
+
+Make the rule system extensible.
+
+---
+
+24. Integrations
+
+Architecture must support future integrations.
+
+Design integration interfaces for:
+
+- Tally
+- ERP systems
+- accounting software
+- inventory systems
+- payment systems
+- WhatsApp Business Platform
+- webhooks
+- REST API
+
+Do not fake integrations.
+
+If an integration is not configured, clearly mark it:
+
+«Not connected»
+
+---
+
+25. Demo Mode
+
+Create a polished demo mode with synthetic data.
+
+The demo must feel like a real distributor's operation.
+
+Include:
+
+- 20+ dealers
+- 100+ products
+- historical orders
+- aliases
+- pricing
+- inventory
+- exceptions
+- voice-order examples
+- image-order examples
+
+Clearly label demo data as synthetic.
+
+Do not present fake data as real customer data.
+
+---
+
+26. Design Direction
+
+The application should look like a serious modern SaaS product.
+
+Think:
+
+- Linear
+- Stripe Dashboard
+- modern enterprise software
+- premium B2B operations platform
+
+NOT:
+
+- generic Bootstrap admin panel
+- colorful startup template
+- excessive gradients
+- huge cards everywhere
+- childish AI aesthetic
+- unnecessary animations
+
+Use:
+
+- excellent typography
+- strong hierarchy
+- dense but readable information
+- subtle borders
+- restrained color
+- clear status indicators
+- keyboard-friendly interactions
+- responsive layout
+
+Desktop-first but fully usable on mobile.
+
+---
+
+27. Navigation
+
+Sidebar:
+
+OrderOS
+
+Command Center
+
+Orders
+  All Orders
+  Needs Attention
+  Completed
+
+Dealers
+
+Products
+
+Inventory
+
+AI Memory
+
+Analytics
+
+Automations
+
+Integrations
+
+Settings
+
+Bottom/side organization switcher:
+
+Sharma Electricals
+
+---
+
+28. Mobile Experience
+
+The mobile version must not simply shrink the desktop UI.
+
+Optimize for:
+
+- quick exception resolution
+- order approval
+- dealer lookup
+- notifications
+- voice order review
+
+Large touch targets.
+
+A manager should be able to approve an order in under 15 seconds.
+
+---
+
+29. Notifications
+
+Notify users about:
+
+- ambiguous orders
+- stock shortages
+- credit violations
+- high-value orders
+- unusual discounts
+- failed processing
+
+Avoid notification spam.
+
+Group related notifications.
+
+---
+
+30. Security
+
+Implement:
+
+- authentication
+- role-based authorization
+- tenant isolation
+- secure API endpoints
+- input validation
+- audit logs
+- rate limiting
+- secure secret handling
+- encrypted sensitive data where appropriate
+
+Every important business action should be auditable.
+
+Example:
+
+Order #4821
+
+14:21 — AI created order
+14:22 — Mohnish edited quantity 20 → 25
+14:23 — Mohnish approved order
+
+---
+
+31. Audit Log
+
+Track:
+
+- order changes
+- price changes
+- dealer changes
+- product changes
+- AI memory changes
+- approvals
+- rule changes
+- integrations
+
+Show:
+
+Who
+What
+When
+
+---
+
+32. Empty States
+
+Do not show blank screens.
+
+Use helpful onboarding.
+
+Example:
+
+NO PRODUCTS YET
+
+Import your existing catalogue to start matching dealer orders.
+
+[IMPORT CSV]
+
+---
+
+33. Onboarding
+
+Create a short onboarding flow:
+
+Step 1
+
+Business information
+
+Step 2
+
+Upload product catalogue
+
+Step 3
+
+Import dealers
+
+Step 4
+
+Configure pricing
+
+Step 5
+
+Configure business rules
+
+Step 6
+
+Process first order
+
+End with:
+
+«"OrderOS is ready."»
+
+---
+
+34. Landing Page
+
+Create a marketing website for the product.
+
+Hero:
+
+Your dealers talk.
+
+OrderOS turns it into orders.
+
+Subheading:
+
+«Convert WhatsApp messages, voice notes, photos and messy B2B order requests into verified sales orders — without forcing your dealers to install another app.»
+
+CTA:
+
+Try Interactive Demo
+
+Secondary:
+
+See How It Works
+
+Hero workflow:
+
+WhatsApp message
+        ↓
+OrderOS AI
+        ↓
+SKU matching
+        ↓
+Validation
+        ↓
+Verified order
+
+Sections:
+
+The problem
+
+How OrderOS works
+
+Dealer Memory
+
+Exception Engine
+
+Voice & Image Orders
+
+ERP/Tally integration
+
+Security
+
+Pricing
+
+Demo
+
+---
+
+35. Pricing Page
+
+Use simple SaaS pricing.
+
+Example:
+
+Starter
+
+₹999/month
+
+Growth
+
+₹2,999/month
+
+Pro
+
+₹7,500+/month
+
+Clearly state that final pricing may depend on order volume and integrations.
+
+Do not use fake claims like "save 90%" unless supported by actual data.
+
+---
+
+36. Technical Requirements
+
+Build the application using a modern production-ready stack.
+
+Preferred:
+
+Frontend:
+Next.js + TypeScript
+
+UI:
+Tailwind CSS + high-quality component system
+
+Backend:
+Next.js API routes/server actions or a clean backend service
+
+Database:
+PostgreSQL
+
+Authentication:
+secure email/password or magic-link authentication
+
+Storage:
+object storage abstraction
+
+AI:
+provider abstraction so the AI provider can be changed without rewriting the application.
+
+Architecture should support:
+
+AIProvider
+ ├── OpenAI
+ ├── Gemini
+ └── Custom/OpenAI-compatible endpoint
+
+Do not hardcode one AI provider.
+
+---
+
+37. AI Architecture
+
+Separate AI from deterministic business logic.
+
+AI handles:
+
+- OCR interpretation
+- transcription
+- entity extraction
+- product matching
+- ambiguity detection
+- language understanding
+- dealer-language interpretation
+
+Deterministic code handles:
+
+- prices
+- totals
+- GST calculations
+- stock calculations
+- credit limits
+- business rules
+- permissions
+- approval state
+
+Never allow the LLM to be the source of truth for financial calculations.
+
+---
+
+38. Structured AI Output
+
+AI should return strict structured data.
+
+Example:
+
+{
+  "items": [
+    {
+      "raw_text": "blue 2.5",
+      "matched_sku": "FIN-25-BLU",
+      "quantity": 5,
+      "unit": "coil",
+      "confidence": 0.97
+    }
+  ],
+  "ambiguities": [],
+  "overall_confidence": 0.97
+}
+
+Validate all AI output against a schema before using it.
+
+---
+
+39. Product Matching
+
+Implement a layered matching system:
+
+1. exact SKU
+2. exact alias
+3. dealer-specific alias
+4. normalized text
+5. fuzzy matching
+6. semantic matching
+7. AI reasoning
+8. human confirmation
+
+Never rely exclusively on an LLM.
+
+---
+
+40. Demo AI
+
+If no real AI API is configured, the demo must still work.
+
+Create a deterministic mock AI layer with realistic responses.
+
+Clearly label:
+
+«Demo AI»
+
+Never pretend a mock response came from a real AI provider.
+
+---
+
+41. Reliability
+
+Implement graceful failure.
+
+If AI processing fails:
+
+AI processing unavailable.
+
+Your original order is safe.
+
+[Retry]
+[Process Manually]
+
+Never lose the original message.
+
+Every processing operation should be retryable.
+
+---
+
+42. Performance
+
+Prioritize:
+
+- fast initial page load
+- optimistic UI where safe
+- pagination
+- server-side filtering
+- indexed database queries
+- background processing for expensive AI jobs
+- proper loading states
+- error states
+
+Do not load thousands of records into the browser.
+
+---
+
+43. Testing
+
+Include tests for:
+
+- authentication
+- tenant isolation
+- permissions
+- order creation
+- AI parsing
+- ambiguous SKU matching
+- price calculation
+- stock validation
+- credit validation
+- approval workflow
+- dealer memory
+- CSV import
+- failure recovery
+
+Create realistic test cases containing:
+
+- English
+- Hindi
+- Hinglish
+- abbreviations
+- typos
+- quantities
+- product aliases
+- voice transcripts
+- ambiguous products
+
+---
+
+44. Important Product Principle
+
+OrderOS should always answer:
+
+«What does the human actually need to do?»
+
+If the AI is confident:
+
+Don't interrupt the human.
+
+If the AI is uncertain:
+
+Show exactly what is uncertain.
+
+If a business rule fails:
+
+Explain why.
+
+If an order is ready:
+
+Make approval extremely fast.
+
+The product is fundamentally an exception-management system, not a dashboard.
+
+---
+
+45. Build Quality
+
+Do NOT produce a prototype that only looks good.
+
+Build:
+
+- real database models
+- real CRUD
+- real authentication
+- real validation
+- real state management
+- real error handling
+- responsive UI
+- realistic demo data
+- modular AI provider
+- clean architecture
+- production-ready code
+
+No placeholder buttons.
+
+No dead navigation.
+
+No fake functionality disguised as complete functionality.
+
+If a feature cannot be fully implemented, clearly isolate it behind a proper integration interface and show its unavailable state.
+
+---
+
+46. Final Acceptance Test
+
+A new demo user should be able to:
+
+1. Open OrderOS
+2. Enter demo workspace
+3. View dashboard
+4. Open an incoming order
+5. See the original messy message
+6. See AI interpretation
+7. See matched SKUs
+8. See confidence
+9. See stock
+10. See dealer-specific pricing
+11. Resolve an ambiguity
+12. Approve an order
+13. View dealer history
+14. View dealer AI memory
+15. Add/edit an alias
+16. Search products/dealers/orders
+17. View analytics
+18. Trigger a simulated exception
+19. Resolve it
+20. Understand the entire value proposition without a tutorial
+
+The entire experience should communicate:
+
+«OrderOS removes manual order entry from Indian B2B distribution.»
+
+Build the product around this single promise.
